@@ -1,57 +1,59 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="page-hero compact">
-  <div class="container">
-    <span class="eyebrow">À propos</span>
-    <h1>Prévention, pédagogie et transparence</h1>
-    <p>SafeHome rend les signaux de qualité de l'air intérieur accessibles sans masquer les limites du capteur actuel.</p>
-  </div>
-</section>
+<div class="app-shell app-page-shell">
+  {% include "partials/sidebar.html" %}
 
-<section class="section">
-  <div class="container content-grid">
-    <article class="info-block" tabindex="0" data-definition="SafeHome sert à rendre les signaux de l'air intérieur compréhensibles et actionnables.">
-      <span class="info-number">01</span>
-      <h2>Le projet</h2>
-      <p>SafeHome associe un ESP32, un BME680, un écran TFT ST7789, une API Flask et une interface web. Le prototype aide à agir sur l'aération, l'humidité, la température et les sources de COV/gaz estimés.</p>
-    </article>
-    <article class="info-block" tabindex="0" data-definition="Le BME680 mesure des grandeurs environnementales, pas le CO2 ni les particules fines.">
-      <span class="info-number">02</span>
-      <h2>Limites BME680</h2>
-      <p>Le BME680 mesure température, humidité, pression et résistance gaz. Il ne mesure pas directement CO2, PM2.5, PM10, CO ou NO2. Ces cartes restent donc “Non mesuré” sans capteur dédié.</p>
-    </article>
-    <article class="info-block warning" tabindex="0" data-definition="Les données aident à prévenir et orienter les bons gestes, mais ne constituent pas un avis médical.">
-      <span class="info-number">03</span>
-      <h2>Important</h2>
-      <p>{{ global_disclaimer }}</p>
-    </article>
-  </div>
-</section>
+  <section class="dashboard-main page-dashboard-main">
+    <header class="dashboard-header fade-up">
+      <div>
+        <p class="eyebrow">À propos</p>
+        <h1>Prévention, pédagogie et transparence</h1>
+        <p>SafeHome rend les signaux de qualité de l'air intérieur accessibles sans masquer les limites du capteur actuel.</p>
+      </div>
+    </header>
 
-<section class="section muted">
-  <div class="container">
-    <div class="section-heading">
-      <span class="eyebrow">Références</span>
-      <h2>Sources sanitaires et bâtiment</h2>
-    </div>
-    <div class="reference-grid static-references">
-      <article class="reference-card">
-        <span class="badge badge-info">Santé</span>
-        <h3>OMS 2021</h3>
-        <p>WHO Global Air Quality Guidelines 2021 pour PM2.5, PM10, NO2, CO, ozone et SO2.</p>
+    <section class="page-card-grid page-card-grid-3">
+      <article class="glass-card page-card info-block fade-up" tabindex="0" data-definition="SafeHome sert à rendre les signaux de l'air intérieur compréhensibles et actionnables.">
+        <span class="info-number">01</span>
+        <h2>Le projet</h2>
+        <p>SafeHome associe un ESP32, un BME680, un écran TFT ST7789, une API Flask et une interface web. Le prototype aide à agir sur l'aération, l'humidité, la température et les sources de COV/gaz estimés.</p>
       </article>
-      <article class="reference-card">
-        <span class="badge badge-info">Air intérieur</span>
-        <h3>OMS pollution intérieure</h3>
-        <p>Repères de risques liés à la pollution domestique, combustion et particules.</p>
+      <article class="glass-card page-card info-block fade-up" tabindex="0" data-definition="Le BME680 mesure des grandeurs environnementales, pas le CO2 ni les particules fines.">
+        <span class="info-number">02</span>
+        <h2>Limites BME680</h2>
+        <p>Le BME680 mesure température, humidité, pression et résistance gaz. Il ne mesure pas directement CO2, PM2.5, PM10, CO ou NO2. Ces cartes restent donc “Non mesuré” sans capteur dédié.</p>
       </article>
-      <article class="reference-card">
-        <span class="badge badge-info">Bâtiment</span>
-        <h3>ASHRAE / EPA</h3>
-        <p>Ventilation, usage prudent du CO2 comme indicateur, humidité intérieure et prévention moisissures.</p>
+      <article class="glass-card page-card info-block warning fade-up" tabindex="0" data-definition="Les données aident à prévenir et orienter les bons gestes, mais ne constituent pas un avis médical.">
+        <span class="info-number">03</span>
+        <h2>Important</h2>
+        <p>{{ global_disclaimer }}</p>
       </article>
-    </div>
-  </div>
-</section>
+    </section>
+
+    <section class="glass-card page-panel fade-up">
+      <div class="section-title compact-title">
+        <p class="eyebrow">Références</p>
+        <h2>Sources sanitaires et bâtiment</h2>
+      </div>
+      <div class="page-card-grid page-card-grid-3">
+        <article class="reference-card">
+          <span class="badge badge-info">Santé</span>
+          <h3>OMS 2021</h3>
+          <p>WHO Global Air Quality Guidelines 2021 pour PM2.5, PM10, NO2, CO, ozone et SO2.</p>
+        </article>
+        <article class="reference-card">
+          <span class="badge badge-info">Air intérieur</span>
+          <h3>OMS pollution intérieure</h3>
+          <p>Repères de risques liés à la pollution domestique, combustion et particules.</p>
+        </article>
+        <article class="reference-card">
+          <span class="badge badge-info">Bâtiment</span>
+          <h3>ASHRAE / EPA</h3>
+          <p>Ventilation, usage prudent du CO2 comme indicateur, humidité intérieure et prévention moisissures.</p>
+        </article>
+      </div>
+    </section>
+  </section>
+</div>
 {% endblock %}

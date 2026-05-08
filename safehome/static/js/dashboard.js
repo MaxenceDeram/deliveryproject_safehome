@@ -36,15 +36,13 @@ async function getJson(url, options = {}) {
 }
 
 function setupTheme() {
-  const saved = localStorage.getItem("safehome-theme") || "dark";
-  document.documentElement.dataset.theme = saved;
+  localStorage.setItem("safehome-theme", "dark");
+  document.documentElement.dataset.theme = "dark";
   const button = qs("[data-theme-toggle]");
-  if (button) button.textContent = saved === "dark" ? "Mode clair" : "Mode sombre";
+  if (button) button.textContent = "Mode sombre";
   button?.addEventListener("click", () => {
-    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    localStorage.setItem("safehome-theme", next);
-    button.textContent = next === "dark" ? "Mode clair" : "Mode sombre";
+    document.documentElement.dataset.theme = "dark";
+    localStorage.setItem("safehome-theme", "dark");
   });
 }
 
@@ -584,6 +582,12 @@ async function refreshDashboard() {
   firstLoad = false;
 }
 
+async function refreshShellHealth() {
+  if (qs("[data-dashboard-app]") || !qs("[data-device-state]")) return;
+  const health = await getJson("/api/health");
+  renderHealth(health);
+}
+
 function setupDashboardRange() {
   qsa("[data-dashboard-range]").forEach((button) => {
     button.addEventListener("click", async () => {
@@ -754,6 +758,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     await refreshDashboard();
+    await refreshShellHealth();
     await loadLegacyHistory();
     await loadRecommendationsPage();
     await loadGuidelines();
@@ -767,6 +772,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       pollInFlight = true;
       try {
         await refreshDashboard();
+      } finally {
+        pollInFlight = false;
+      }
+    }, 10000);
+  } else if (qs("[data-device-state]")) {
+    window.setInterval(async () => {
+      if (pollInFlight) return;
+      pollInFlight = true;
+      try {
+        await refreshShellHealth();
       } finally {
         pollInFlight = false;
       }

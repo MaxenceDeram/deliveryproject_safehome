@@ -1,26 +1,31 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="page-hero compact">
-  <div class="container">
-    <span class="eyebrow">Conseils</span>
-    <h1>Que faire maintenant ?</h1>
-    <p>Des gestes simples, adaptés aux dernières mesures.</p>
-  </div>
-</section>
+<div class="app-shell app-page-shell">
+  {% include "partials/sidebar.html" %}
 
-<section class="section">
-  <div class="container">
-    <div class="tool-panel compact-panel">
+  <section class="dashboard-main page-dashboard-main">
+    <header class="dashboard-header fade-up">
       <div>
-        <span class="eyebrow">Statut actuel</span>
+        <p class="eyebrow">Conseils</p>
+        <h1>Que faire maintenant ?</h1>
+        <p>Des gestes simples, adaptés aux dernières mesures.</p>
+      </div>
+      <div class="header-actions">
+        <a class="button button-secondary" href="{{ url_for('dashboard') }}">Retour dashboard</a>
+      </div>
+    </header>
+
+    <section class="glass-card page-panel fade-up">
+      <div class="section-title compact-title">
+        <p class="eyebrow">Statut actuel</p>
         <div class="recommendation-status" data-recommendation-status tabindex="0" data-definition="Ce résumé reprend le statut global actuel et adapte les conseils aux mesures disponibles.">
           Chargement des conseils...
         </div>
       </div>
-      <a class="button button-secondary" href="{{ url_for('dashboard') }}">Retour dashboard</a>
-    </div>
-    <div class="recommendations-grid" data-recommendations-grid></div>
-  </div>
-</section>
+    </section>
+
+    <section class="recommendations-grid page-card-grid page-card-grid-3" data-recommendations-grid></section>
+  </section>
+</div>
 {% endblock %}

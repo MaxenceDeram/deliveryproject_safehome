@@ -8,11 +8,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20260508-4">
-    <script defer src="{{ url_for('static', filename='js/dashboard.js') }}?v=20260508-4"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20260508-7">
+    <script defer src="{{ url_for('static', filename='js/dashboard.js') }}?v=20260508-7"></script>
     {% block head %}{% endblock %}
   </head>
-  <body class="{% if dashboard_shell %}dashboard-body{% endif %}{% block body_class %}{% endblock %}">
+  <body class="{% if dashboard_shell %}dashboard-body{% else %}app-page-body{% endif %}{% block body_class %}{% endblock %}">
     <a class="skip-link" href="#main">Aller au contenu</a>
     {% if not dashboard_shell %}
     <header class="site-header">
@@ -27,7 +27,6 @@
           <a href="{{ url_for('recommendations') }}">Conseils</a>
           <a href="{{ url_for('about') }}">À propos</a>
         </div>
-        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Changer le mode couleur">Mode sombre</button>
       </nav>
     </header>
 

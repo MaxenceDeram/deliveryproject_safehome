@@ -6,47 +6,7 @@
 
 {% block content %}
 <div class="app-shell is-loading" data-dashboard-app aria-busy="true">
-  <aside class="sidebar" aria-label="Navigation SafeHome">
-    <a class="sidebar-brand" href="{{ url_for('dashboard') }}" aria-label="SafeHome dashboard">
-      <span class="brand-mark">
-        <img src="{{ url_for('static', filename='assets/logo-company.jpg') }}" alt="">
-      </span>
-      <span>
-        <strong>SafeHome</strong>
-        <small>Air Quality Monitor</small>
-      </span>
-    </a>
-
-    <nav class="sidebar-nav" aria-label="Menu principal">
-      <a class="active" href="{{ url_for('dashboard') }}"><span>⌂</span>Dashboard</a>
-      <a href="{{ url_for('history') }}"><span>⌁</span>Historique</a>
-      <a href="{{ url_for('recommendations') }}"><span>◌</span>Conseils</a>
-      <a href="{{ url_for('api_export_csv') }}"><span>⇩</span>Export CSV</a>
-      <a href="{{ url_for('about') }}"><span>?</span>À propos</a>
-    </nav>
-
-    <section class="device-mini glass-card" aria-label="Appareil connecté">
-      <div class="connected-badge" data-device-state>
-        <span></span>
-        <strong>Vérification...</strong>
-      </div>
-      <h2 data-device-id>SafeHome Device #1</h2>
-      <p>Dernière mise à jour</p>
-      <small data-last-update>En attente</small>
-      <div class="device-telemetry">
-        <span>Wi‑Fi <strong data-wifi-state>--</strong></span>
-        <span>Batterie <strong data-battery-level>--</strong></span>
-      </div>
-    </section>
-
-    <section class="sidebar-profile" aria-label="Profil utilisateur">
-      <span>L</span>
-      <div>
-        <strong>Local</strong>
-        <small>Prototype SafeHome</small>
-      </div>
-    </section>
-  </aside>
+  {% include "partials/sidebar.html" %}
 
   <section class="dashboard-main">
     <header class="dashboard-header fade-up">

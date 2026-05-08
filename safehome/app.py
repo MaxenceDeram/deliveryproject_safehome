@@ -25,22 +25,22 @@ def index():
 
 @app.route("/dashboard")
 def dashboard():
-    return render_template("dashboard.html", title="Dashboard", dashboard_shell=True)
+    return render_template("dashboard.html", title="Dashboard", dashboard_shell=True, active_page="dashboard")
 
 
 @app.route("/history")
 def history():
-    return render_template("history.html", title="Historique")
+    return render_template("history.html", title="Historique", dashboard_shell=True, active_page="history")
 
 
 @app.route("/recommendations")
 def recommendations():
-    return render_template("recommendations.html", title="Recommandations")
+    return render_template("recommendations.html", title="Recommandations", dashboard_shell=True, active_page="recommendations")
 
 
 @app.route("/about")
 def about():
-    return render_template("about.html", title="A propos")
+    return render_template("about.html", title="A propos", dashboard_shell=True, active_page="about")
 
 
 @app.route("/login", methods=["GET", "POST"])
