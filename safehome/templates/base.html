@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20260508-3">
-    <script defer src="{{ url_for('static', filename='js/dashboard.js') }}?v=20260508-3"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20260508-4">
+    <script defer src="{{ url_for('static', filename='js/dashboard.js') }}?v=20260508-4"></script>
     {% block head %}{% endblock %}
   </head>
   <body class="{% if dashboard_shell %}dashboard-body{% endif %}{% block body_class %}{% endblock %}">
@@ -23,10 +23,10 @@
         <button class="nav-toggle" type="button" data-nav-toggle aria-label="Ouvrir le menu">☰</button>
         <div class="nav-links" data-nav-links>
           <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('history') }}">Historique</a>
           <a href="{{ url_for('recommendations') }}">Conseils</a>
           <a href="{{ url_for('about') }}">À propos</a>
         </div>
-        <a class="account-button" href="{{ url_for('login') }}">Compte</a>
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="Changer le mode couleur">Mode sombre</button>
       </nav>
     </header>
@@ -52,6 +52,7 @@
         <div>
           <h2>Navigation</h2>
           <a href="{{ url_for('dashboard') }}">Tableau de bord</a>
+          <a href="{{ url_for('history') }}">Historique</a>
           <a href="{{ url_for('recommendations') }}">Conseils</a>
           <a href="{{ url_for('about') }}">À propos</a>
         </div>

@@ -18,27 +18,36 @@
 
 <section class="section">
   <div class="container">
-    <div class="filter-bar" role="group" aria-label="Choisir la période">
-      <button class="filter active" type="button" data-range="24h">24h</button>
-      <button class="filter" type="button" data-range="7d">7 jours</button>
-      <button class="filter" type="button" data-range="30d">30 jours</button>
+    <div class="tool-panel">
+      <div>
+        <span class="eyebrow">Données reçues</span>
+        <p class="summary-box" data-history-summary>Aucune mesure enregistrée pour le moment. Lancez une simulation depuis le dashboard ou connectez l'ESP32.</p>
+      </div>
+      <div class="filter-bar" role="group" aria-label="Choisir la période">
+        <button class="filter active" type="button" data-range="24h">24h</button>
+        <button class="filter" type="button" data-range="7d">7 jours</button>
+        <button class="filter" type="button" data-range="30d">30 jours</button>
+      </div>
     </div>
-    <p class="summary-box" data-history-summary>Aucune mesure enregistrée pour le moment. Lancez une simulation depuis le dashboard ou connectez l'ESP32.</p>
     <div class="charts-grid">
       <article class="chart-card" tabindex="0" data-definition="Signal indirect du BME680: une résistance gaz plus basse peut indiquer davantage de COV/gaz, mais ce n'est pas une mesure directe de polluant.">
         <h2>Gaz / COV estimés</h2>
+        <p>Signal indirect du BME680, affiché seulement si le capteur envoie une mesure.</p>
         <div class="chart-frame"><canvas id="gasChart"></canvas></div>
       </article>
       <article class="chart-card" tabindex="0" data-definition="Objectif de confort SafeHome: 40-60%, avec référence EPA indiquant de rester sous 60% si possible.">
         <h2>Humidité</h2>
+        <p>Objectif de confort indicatif : rester proche de 40-60%.</p>
         <div class="chart-frame"><canvas id="humidityChart"></canvas></div>
       </article>
       <article class="chart-card" tabindex="0" data-definition="Zone de confort du prototype: environ 19 °C à 22 °C selon l'usage de la pièce.">
         <h2>Température</h2>
+        <p>Lecture BME680, utile pour comprendre le confort intérieur.</p>
         <div class="chart-frame"><canvas id="temperatureChart"></canvas></div>
       </article>
       <article class="chart-card" tabindex="0" data-definition="Score calculé uniquement avec les mesures réellement disponibles.">
         <h2>Score global</h2>
+        <p>Score calculé sans inventer les données absentes.</p>
         <div class="chart-frame"><canvas id="scoreChart"></canvas></div>
       </article>
     </div>

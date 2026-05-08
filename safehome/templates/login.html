@@ -5,12 +5,12 @@
   <div class="container login-layout">
     <div class="login-copy">
       <span class="eyebrow">Espace personnel</span>
-      <h1>Acceder a mon compte SafeHome</h1>
-      <p>Retrouvez vos mesures, vos alertes et vos recommandations personnalisees dans un espace clair et securise.</p>
-      <div class="login-assurance" data-definition="Le capteur transmet les dernieres mesures de qualite de l'air vers votre tableau de bord SafeHome.">
+      <h1>Accéder à mon compte SafeHome</h1>
+      <p>Cette zone est prévue pour une future gestion de compte. Le prototype actuel fonctionne surtout avec le dashboard local.</p>
+      <div class="login-assurance" data-definition="Le prototype local n'utilise pas encore d'authentification réelle.">
         <span class="pulse"></span>
-        <strong>Capteur salon connecte</strong>
-        <small>Derniere synchronisation il y a moins d'une minute</small>
+        <strong>Compte non activé</strong>
+        <small>Aucune authentification réelle pour le moment</small>
       </div>
     </div>
 
@@ -24,12 +24,12 @@
       <div class="login-row">
         <label class="checkline">
           <input type="checkbox" name="remember">
-          <span>Rester connecte</span>
+          <span>Rester connecté</span>
         </label>
-        <a href="{{ url_for('login') }}">Mot de passe oublie ?</a>
+        <a href="{{ url_for('login') }}">Mot de passe oublié ?</a>
       </div>
       <button class="button button-primary" type="submit">Se connecter</button>
-      <p class="login-note">Acces reserve aux utilisateurs SafeHome.</p>
+      <p class="login-note">Accès réservé aux utilisateurs SafeHome.</p>
     </form>
   </div>
 </section>

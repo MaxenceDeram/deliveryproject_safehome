@@ -19,12 +19,10 @@
 
     <nav class="sidebar-nav" aria-label="Menu principal">
       <a class="active" href="{{ url_for('dashboard') }}"><span>⌂</span>Dashboard</a>
-      <a href="{{ url_for('dashboard') }}"><span>≋</span>Live Monitor</a>
       <a href="{{ url_for('history') }}"><span>⌁</span>Historique</a>
-      <a href="{{ url_for('dashboard') }}"><span>▣</span>Appareils</a>
-      <a href="{{ url_for('recommendations') }}"><span>◌</span>Alertes</a>
-      <a href="{{ url_for('api_export_csv') }}"><span>⇩</span>Rapports</a>
-      <a href="{{ url_for('about') }}"><span>⚙</span>Paramètres</a>
+      <a href="{{ url_for('recommendations') }}"><span>◌</span>Conseils</a>
+      <a href="{{ url_for('api_export_csv') }}"><span>⇩</span>Export CSV</a>
+      <a href="{{ url_for('about') }}"><span>?</span>À propos</a>
     </nav>
 
     <section class="device-mini glass-card" aria-label="Appareil connecté">
@@ -42,10 +40,10 @@
     </section>
 
     <section class="sidebar-profile" aria-label="Profil utilisateur">
-      <span>U</span>
+      <span>L</span>
       <div>
-        <strong>Utilisateur</strong>
-        <small>Compte Premium</small>
+        <strong>Local</strong>
+        <small>Prototype SafeHome</small>
       </div>
     </section>
   </aside>

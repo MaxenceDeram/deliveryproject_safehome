@@ -39,7 +39,7 @@ python app.py
 Site local :
 
 ```text
-http://127.0.0.1:5000
+http://127.0.0.1:5001
 ```
 
 Le projet n'a pas de build frontend séparé : le frontend est servi par Flask dans `templates/`, `static/css/` et `static/js/`.
@@ -53,7 +53,7 @@ Pour faire une démo volontairement, cliquer sur `Simuler` depuis le dashboard.
 Ou appeler :
 
 ```bash
-curl http://127.0.0.1:5000/api/simulate
+curl http://127.0.0.1:5001/api/simulate
 ```
 
 La simulation est explicitement marquée comme `source: simulation`. Elle peut simuler BME680 + SCD40/SCD41, mais ne prétend pas être une mesure réelle.
@@ -90,7 +90,7 @@ Champs futurs optionnels :
 Exemple curl :
 
 ```bash
-curl -X POST http://127.0.0.1:5000/api/sensor-data \
+curl -X POST http://127.0.0.1:5001/api/sensor-data \
   -H "Content-Type: application/json" \
   -d '{
     "device_id": "safehome_001",
@@ -186,7 +186,7 @@ ipconfig getifaddr en1
 Dans `config.h`, utiliser l'IP du Mac :
 
 ```cpp
-#define SAFEHOME_API_URL "http://192.168.1.42:5000/api/sensor-data"
+#define SAFEHOME_API_URL "http://192.168.1.42:5001/api/sensor-data"
 ```
 
 Ne pas utiliser `127.0.0.1` depuis l'ESP32.
@@ -241,7 +241,7 @@ API unreachable :
 - Vérifier que Flask tourne.
 - Vérifier que Mac et ESP32 sont sur le même WiFi.
 - Autoriser Python/Terminal dans le firewall macOS.
-- Tester `http://IP_DU_MAC:5000/api/health`.
+- Tester `http://IP_DU_MAC:5001/api/health`.
 
 ## Limites techniques du prototype
 

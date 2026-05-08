@@ -11,8 +11,14 @@
 
 <section class="section">
   <div class="container">
-    <div class="recommendation-status" data-recommendation-status tabindex="0" data-definition="Ce résumé reprend le statut global actuel et adapte les conseils aux mesures disponibles.">
-      Chargement des conseils...
+    <div class="tool-panel compact-panel">
+      <div>
+        <span class="eyebrow">Statut actuel</span>
+        <div class="recommendation-status" data-recommendation-status tabindex="0" data-definition="Ce résumé reprend le statut global actuel et adapte les conseils aux mesures disponibles.">
+          Chargement des conseils...
+        </div>
+      </div>
+      <a class="button button-secondary" href="{{ url_for('dashboard') }}">Retour dashboard</a>
     </div>
     <div class="recommendations-grid" data-recommendations-grid></div>
   </div>
