@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="SafeHome surveille la qualité de l'air intérieur avec prudence et transparence.">
+    <title>SafeHome - {{ title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20260508-1">
+    <script defer src="{{ url_for('static', filename='js/dashboard.js') }}?v=20260508-1"></script>
+    {% block head %}{% endblock %}
+  </head>
+  <body class="{% if dashboard_shell %}dashboard-body{% endif %}{% block body_class %}{% endblock %}">
+    <a class="skip-link" href="#main">Aller au contenu</a>
+    {% if not dashboard_shell %}
+    <header class="site-header">
+      <nav class="nav container" aria-label="Navigation principale">
+        <a class="brand" href="{{ url_for('index') }}" aria-label="Accueil SafeHome">
+          <img src="{{ url_for('static', filename='assets/logo-web.png') }}" alt="SafeHome">
+        </a>
+        <button class="nav-toggle" type="button" data-nav-toggle aria-label="Ouvrir le menu">☰</button>
+        <div class="nav-links" data-nav-links>
+          <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('recommendations') }}">Conseils</a>
+          <a href="{{ url_for('about') }}">À propos</a>
+        </div>
+        <a class="account-button" href="{{ url_for('login') }}">Compte</a>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Changer le mode couleur">Mode sombre</button>
+      </nav>
+    </header>
+
+    <div class="disclaimer-banner" role="note">
+      <div class="container">{{ global_disclaimer }}</div>
+    </div>
+    {% endif %}
+
+    <main id="main">
+      {% block content %}{% endblock %}
+    </main>
+
+    <div class="toast" data-toast role="status" aria-live="polite"></div>
+
+    {% if not dashboard_shell %}
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <img class="footer-logo" src="{{ url_for('static', filename='assets/logo-web.png') }}" alt="SafeHome">
+          <p>Un suivi simple de l'air intérieur, sans surinterprétation.</p>
+        </div>
+        <div>
+          <h2>Navigation</h2>
+          <a href="{{ url_for('dashboard') }}">Tableau de bord</a>
+          <a href="{{ url_for('recommendations') }}">Conseils</a>
+          <a href="{{ url_for('about') }}">À propos</a>
+        </div>
+        <div>
+          <h2>Limite claire</h2>
+          <p>BME680 : température, humidité, pression et COV estimés. CO2 et particules nécessitent des capteurs dédiés.</p>
+          <span class="badge badge-info">Prototype non certifié</span>
+        </div>
+      </div>
+    </footer>
+    {% endif %}
+  </body>
+</html>

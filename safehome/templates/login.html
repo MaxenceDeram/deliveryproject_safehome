@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="login-page">
+  <div class="container login-layout">
+    <div class="login-copy">
+      <span class="eyebrow">Espace personnel</span>
+      <h1>Acceder a mon compte SafeHome</h1>
+      <p>Retrouvez vos mesures, vos alertes et vos recommandations personnalisees dans un espace clair et securise.</p>
+      <div class="login-assurance" data-definition="Le capteur transmet les dernieres mesures de qualite de l'air vers votre tableau de bord SafeHome.">
+        <span class="pulse"></span>
+        <strong>Capteur salon connecte</strong>
+        <small>Derniere synchronisation il y a moins d'une minute</small>
+      </div>
+    </div>
+
+    <form class="login-card" method="post" action="{{ url_for('login') }}">
+      <img src="{{ url_for('static', filename='assets/logo-web.png') }}" alt="SafeHome">
+      <h2>Connexion</h2>
+      <label for="email">Adresse e-mail</label>
+      <input id="email" name="email" type="email" placeholder="prenom.nom@email.fr" autocomplete="email" required>
+      <label for="password">Mot de passe</label>
+      <input id="password" name="password" type="password" placeholder="Votre mot de passe" autocomplete="current-password" required>
+      <div class="login-row">
+        <label class="checkline">
+          <input type="checkbox" name="remember">
+          <span>Rester connecte</span>
+        </label>
+        <a href="{{ url_for('login') }}">Mot de passe oublie ?</a>
+      </div>
+      <button class="button button-primary" type="submit">Se connecter</button>
+      <p class="login-note">Acces reserve aux utilisateurs SafeHome.</p>
+    </form>
+  </div>
+</section>
+{% endblock %}

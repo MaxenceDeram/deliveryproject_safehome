@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero minimal-hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">SafeHome</span>
+      <h1>Respirez, on simplifie.</h1>
+      <p>SafeHome transforme les mesures de votre capteur en une réponse claire : tout va bien, surveiller, ou agir.</p>
+      <div class="hero-actions">
+        <a class="button button-primary" href="{{ url_for('dashboard') }}">Ouvrir le dashboard</a>
+        <a class="button button-secondary" href="{{ url_for('recommendations') }}">Voir les conseils</a>
+      </div>
+    </div>
+    <div class="home-preview" aria-label="Aperçu SafeHome">
+      <img src="{{ url_for('static', filename='assets/logo-web.png') }}" alt="SafeHome">
+      <div>
+        <span>Score</span>
+        <strong>86</strong>
+        <small>Air correct · confiance moyenne</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section minimal-section">
+  <div class="container minimal-grid">
+    <article>
+      <span>01</span>
+      <h2>Lisible</h2>
+      <p>Un score, une phrase, une action.</p>
+    </article>
+    <article>
+      <span>02</span>
+      <h2>Honnête</h2>
+      <p>CO2 et particules affichés seulement avec un vrai capteur dédié.</p>
+    </article>
+    <article>
+      <span>03</span>
+      <h2>Prudent</h2>
+      <p>Des conseils de confort et de prévention, jamais un diagnostic.</p>
+    </article>
+  </div>
+</section>
+{% endblock %}

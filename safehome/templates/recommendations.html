@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-hero compact">
+  <div class="container">
+    <span class="eyebrow">Conseils</span>
+    <h1>Que faire maintenant ?</h1>
+    <p>Des gestes simples, adaptés aux dernières mesures.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="recommendation-status" data-recommendation-status tabindex="0" data-definition="Ce résumé reprend le statut global actuel et adapte les conseils aux mesures disponibles.">
+      Chargement des conseils...
+    </div>
+    <div class="recommendations-grid" data-recommendations-grid></div>
+  </div>
+</section>
+{% endblock %}

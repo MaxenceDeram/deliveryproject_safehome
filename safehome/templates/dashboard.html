@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block head %}
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="app-shell is-loading" data-dashboard-app aria-busy="true">
+  <aside class="sidebar" aria-label="Navigation SafeHome">
+    <a class="sidebar-brand" href="{{ url_for('dashboard') }}" aria-label="SafeHome dashboard">
+      <span class="brand-mark">
+        <img src="{{ url_for('static', filename='assets/logo-company.jpg') }}" alt="">
+      </span>
+      <span>
+        <strong>SafeHome</strong>
+        <small>Air Quality Monitor</small>
+      </span>
+    </a>
+
+    <nav class="sidebar-nav" aria-label="Menu principal">
+      <a class="active" href="{{ url_for('dashboard') }}"><span>⌂</span>Dashboard</a>
+      <a href="{{ url_for('dashboard') }}"><span>≋</span>Live Monitor</a>
+      <a href="{{ url_for('history') }}"><span>⌁</span>Historique</a>
+      <a href="{{ url_for('dashboard') }}"><span>▣</span>Appareils</a>
+      <a href="{{ url_for('recommendations') }}"><span>◌</span>Alertes</a>
+      <a href="{{ url_for('api_export_csv') }}"><span>⇩</span>Rapports</a>
+      <a href="{{ url_for('about') }}"><span>⚙</span>Paramètres</a>
+    </nav>
+
+    <section class="device-mini glass-card" aria-label="Appareil connecté">
+      <div class="connected-badge" data-device-state>
+        <span></span>
+        <strong>Vérification...</strong>
+      </div>
+      <h2 data-device-id>SafeHome Device #1</h2>
+      <p>Dernière mise à jour</p>
+      <small data-last-update>En attente</small>
+      <div class="device-telemetry">
+        <span>Wi‑Fi <strong data-wifi-state>--</strong></span>
+        <span>Batterie <strong data-battery-level>--</strong></span>
+      </div>
+    </section>
+
+    <section class="sidebar-profile" aria-label="Profil utilisateur">
+      <span>U</span>
+      <div>
+        <strong>Utilisateur</strong>
+        <small>Compte Premium</small>
+      </div>
+    </section>
+  </aside>
+
+  <section class="dashboard-main">
+    <header class="dashboard-header fade-up">
+      <div>
+        <p class="eyebrow">Surveillance temps réel</p>
+        <h1>Bonjour ! <span aria-hidden="true">🌿</span></h1>
+        <p>Voici la qualité de l'air de votre maison en temps réel.</p>
+      </div>
+      <div class="header-actions">
+        <span class="status-badge connected" data-api-state><span></span><strong data-api-label>En ligne</strong></span>
+        <span class="status-badge simulation is-hidden" data-simulation-state><span></span><strong>Données simulées</strong></span>
+        <button class="icon-button" type="button" aria-label="Notifications" title="Notifications">⌁</button>
+        <button class="button button-ghost" type="button" data-simulate aria-label="Simuler une mesure">Simuler</button>
+        <a class="button button-primary" href="{{ url_for('api_export_csv') }}" data-export-csv aria-label="Exporter le rapport CSV">⇩ Exporter le rapport</a>
+      </div>
+    </header>
+
+    <section class="metrics-row" aria-label="Mesures principales">
+      <article class="glass-card score-card metric-card unknown fade-up" data-score-card>
+        <div>
+          <p class="card-label">Qualité de l'air</p>
+          <h2 data-air-status>En attente</h2>
+          <p class="muted" data-score-caption>Connectez le capteur ou simulez une mesure.</p>
+        </div>
+        <div class="score-orb" data-score-orb>
+          <span data-smiley>○</span>
+          <strong><span data-score>--</span><small>/100</small></strong>
+        </div>
+        <div class="progress-track" aria-hidden="true"><span data-score-progress></span></div>
+      </article>
+
+      <article class="glass-card metric-card unknown fade-up" data-metric-card="co2">
+        <div class="metric-top">
+          <p class="card-label">CO₂</p>
+          <span class="metric-icon">⌁</span>
+        </div>
+        <div class="metric-value"><strong data-metric-value>--</strong><span data-metric-unit>ppm</span></div>
+        <p class="metric-status"><span></span><b data-metric-status>Non mesuré</b></p>
+        <canvas class="sparkline" id="sparkline-co2" aria-label="Mini courbe CO2"></canvas>
+      </article>
+
+      <article class="glass-card metric-card unknown fade-up" data-metric-card="temperature">
+        <div class="metric-top">
+          <p class="card-label">Température</p>
+          <span class="metric-icon">℃</span>
+        </div>
+        <div class="metric-value"><strong data-metric-value>--</strong><span data-metric-unit>°C</span></div>
+        <p class="metric-status"><span></span><b data-metric-status>En attente</b></p>
+        <canvas class="sparkline" id="sparkline-temperature" aria-label="Mini courbe température"></canvas>
+      </article>
+
+      <article class="glass-card metric-card unknown fade-up" data-metric-card="humidity">
+        <div class="metric-top">
+          <p class="card-label">Humidité</p>
+          <span class="metric-icon">%</span>
+        </div>
+        <div class="metric-value"><strong data-metric-value>--</strong><span data-metric-unit>%</span></div>
+        <p class="metric-status"><span></span><b data-metric-status>En attente</b></p>
+        <canvas class="sparkline" id="sparkline-humidity" aria-label="Mini courbe humidité"></canvas>
+      </article>
+
+      <article class="glass-card metric-card unknown fade-up" data-metric-card="gas_resistance">
+        <div class="metric-top">
+          <p class="card-label">COV (Qualité air)</p>
+          <span class="metric-icon">≋</span>
+        </div>
+        <div class="metric-value"><strong data-metric-value>--</strong><span data-metric-unit>IAQ</span></div>
+        <p class="metric-status"><span></span><b data-metric-status>En attente</b></p>
+        <canvas class="sparkline" id="sparkline-gas" aria-label="Mini courbe COV"></canvas>
+      </article>
+    </section>
+
+    <section class="insight-grid" aria-label="Interprétation et limites">
+      <article class="glass-card interpretation-card fade-up">
+        <div class="section-kicker">
+          <span></span>
+          <small>Interprétation simple</small>
+        </div>
+        <h2 data-simple-status>Analyse en cours</h2>
+        <p data-simple-message>SafeHome analyse uniquement les mesures réellement reçues.</p>
+        <div class="next-action">
+          <small>Action conseillée</small>
+          <strong data-simple-action>Patientez quelques secondes.</strong>
+        </div>
+      </article>
+
+      <article class="glass-card sensor-limits-card fade-up">
+        <div class="section-kicker sensor">
+          <span></span>
+          <small>Limites du capteur</small>
+        </div>
+        <div class="limits-grid">
+          <span><small>BME680</small><strong>Température, humidité, pression, COV estimés</strong></span>
+          <span><small>SCD40/SCD41</small><strong data-co2-source>CO₂ réel si reçu</strong></span>
+          <span><small>PM2.5 / PM10</small><strong data-pm-source>Non mesuré sans capteur dédié</strong></span>
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="glass-card chart-panel fade-up">
+        <div class="section-title">
+          <div>
+            <h2>Évolution des mesures</h2>
+            <p>CO₂ réel si SCD40/SCD41 présent, BME680 pour température, humidité et COV estimés.</p>
+          </div>
+          <div class="segmented-control" role="group" aria-label="Période du graphique">
+            <button class="active" type="button" data-dashboard-range="6h">6h</button>
+            <button type="button" data-dashboard-range="24h">24h</button>
+            <button type="button" data-dashboard-range="7d">7j</button>
+            <button type="button" data-dashboard-range="30d">30j</button>
+          </div>
+        </div>
+        <div class="chart-legend" aria-hidden="true">
+          <span class="legend-co2">CO₂ (ppm)</span>
+          <span class="legend-temp">Température (°C)</span>
+          <span class="legend-humidity">Humidité (%)</span>
+          <span class="legend-voc">COV (IAQ)</span>
+        </div>
+        <div class="chart-frame large">
+          <canvas id="measurementsChart" aria-label="Graphique historique des mesures"></canvas>
+        </div>
+      </article>
+
+      <aside class="glass-card recommendations-panel fade-up">
+        <div class="section-title compact-title">
+          <h2><span aria-hidden="true">♧</span> Recommandations</h2>
+        </div>
+        <div class="recommendation-list" data-dashboard-recommendations>
+          <article class="recommendation-card skeleton" aria-hidden="true"></article>
+          <article class="recommendation-card skeleton" aria-hidden="true"></article>
+          <article class="recommendation-card skeleton" aria-hidden="true"></article>
+        </div>
+      </aside>
+    </section>
+
+    <section class="bottom-grid" aria-label="Résumé secondaire">
+      <article class="glass-card donut-card fade-up">
+        <h2>Répartition de la qualité de l'air</h2>
+        <div class="donut-layout">
+          <div class="chart-frame donut">
+            <canvas id="qualityDonut" aria-label="Répartition des statuts"></canvas>
+          </div>
+          <div class="donut-legend" data-donut-legend></div>
+        </div>
+      </article>
+
+      <article class="glass-card summary-card fade-up">
+        <h2>Résumé quotidien</h2>
+        <div class="summary-list" data-daily-summary></div>
+      </article>
+
+      <article class="glass-card summary-card fade-up">
+        <h2>Comparaison avec l'extérieur</h2>
+        <div class="summary-list">
+          <span><small>CO₂ extérieur</small><strong>Non mesuré</strong></span>
+          <span><small>Qualité air extérieur</small><strong>Non connectée</strong></span>
+          <span><small>Humidité extérieure</small><strong>Non mesurée</strong></span>
+        </div>
+      </article>
+
+      <article class="glass-card summary-card fade-up">
+        <h2>Risques publics sensibles</h2>
+        <div class="summary-list" data-risk-summary></div>
+      </article>
+
+      <article class="glass-card summary-card fade-up">
+        <h2>Niveau de confiance</h2>
+        <div class="confidence-meter">
+          <span data-confidence-level>--</span>
+          <div><i data-confidence-bar></i></div>
+          <p data-confidence-text>En attente de données.</p>
+        </div>
+      </article>
+    </section>
+
+    <p class="dashboard-disclaimer">{{ global_disclaimer }}</p>
+  </section>
+</div>
+{% endblock %}

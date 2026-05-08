@@ -1,0 +1,32 @@
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local configuration and secrets
+.env
+.env.*
+config.h
+secrets.h
+
+# Local databases and generated files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# IDE/editor
+.idea/
+.vscode/

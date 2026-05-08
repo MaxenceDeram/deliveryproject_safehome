@@ -1,0 +1,10 @@
+<svg width="220" height="64" viewBox="0 0 220 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">SafeHome</title>
+  <desc id="desc">Logo SafeHome avec nuage et maison</desc>
+  <rect width="220" height="64" rx="14" fill="#FFFFFF"/>
+  <path d="M35.6 42.5h38.7c7 0 12.7-5.3 12.7-11.9 0-6.1-4.8-11.1-11.1-11.8C73.4 11.5 66.2 6.7 58 8.2c-6.5 1.2-11.5 6-13 12-1.9-.9-4-1.4-6.3-1.4-8 0-14.5 6.1-14.5 13.7s5.1 10 11.4 10Z" fill="#E7F6FF"/>
+  <path d="M40 42V29.9l17.6-12.7 17.6 12.7V42H64.1v-9.8H51.2V42H40Z" fill="#0072CE"/>
+  <path d="M38.3 31.2 57.6 17.1l19.3 14.1" stroke="#0AA36E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="99" y="29" fill="#083A63" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="800">SafeHome</text>
+  <text x="101" y="47" fill="#4D6475" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600">Air interieur sous controle</text>
+</svg>

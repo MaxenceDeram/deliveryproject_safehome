@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block head %}
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<section class="page-hero compact">
+  <div class="container action-heading">
+    <div>
+      <span class="eyebrow">Historique</span>
+      <h1>Évolution des mesures</h1>
+      <p>Suivez les valeurs réellement reçues par l'API. Les graphiques restent vides tant qu'aucune mesure ESP32 ou simulation n'a été créée.</p>
+    </div>
+    <a class="button button-primary" href="{{ url_for('api_export_csv') }}" data-export-csv>Exporter CSV</a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="filter-bar" role="group" aria-label="Choisir la période">
+      <button class="filter active" type="button" data-range="24h">24h</button>
+      <button class="filter" type="button" data-range="7d">7 jours</button>
+      <button class="filter" type="button" data-range="30d">30 jours</button>
+    </div>
+    <p class="summary-box" data-history-summary>Aucune mesure enregistrée pour le moment. Lancez une simulation depuis le dashboard ou connectez l'ESP32.</p>
+    <div class="charts-grid">
+      <article class="chart-card" tabindex="0" data-definition="Signal indirect du BME680: une résistance gaz plus basse peut indiquer davantage de COV/gaz, mais ce n'est pas une mesure directe de polluant.">
+        <h2>Gaz / COV estimés</h2>
+        <div class="chart-frame"><canvas id="gasChart"></canvas></div>
+      </article>
+      <article class="chart-card" tabindex="0" data-definition="Objectif de confort SafeHome: 40-60%, avec référence EPA indiquant de rester sous 60% si possible.">
+        <h2>Humidité</h2>
+        <div class="chart-frame"><canvas id="humidityChart"></canvas></div>
+      </article>
+      <article class="chart-card" tabindex="0" data-definition="Zone de confort du prototype: environ 19 °C à 22 °C selon l'usage de la pièce.">
+        <h2>Température</h2>
+        <div class="chart-frame"><canvas id="temperatureChart"></canvas></div>
+      </article>
+      <article class="chart-card" tabindex="0" data-definition="Score calculé uniquement avec les mesures réellement disponibles.">
+        <h2>Score global</h2>
+        <div class="chart-frame"><canvas id="scoreChart"></canvas></div>
+      </article>
+    </div>
+  </div>
+</section>
+{% endblock %}
