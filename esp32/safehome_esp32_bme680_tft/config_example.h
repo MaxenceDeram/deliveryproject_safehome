@@ -7,8 +7,8 @@
 #define WIFI_PASSWORD "Votre_mot_de_passe"
 
 // Exemple depuis le même réseau WiFi que le Mac:
-// http://192.168.1.42:5000/api/sensor-data
-#define SAFEHOME_API_URL "http://192.168.1.XX:5000/api/sensor-data"
+// http://192.168.1.42:5001/api/sensor-data
+#define SAFEHOME_API_URL "http://192.168.1.XX:5001/api/sensor-data"
 #define DEVICE_ID "safehome_001"
 
 // En développement, l'envoi toutes les 10 secondes facilite la démonstration.

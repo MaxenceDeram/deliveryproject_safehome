@@ -68,7 +68,7 @@ Installer aussi le support de cartes ESP32 via Boards Manager si ce n'est pas d�
 Exemple d'URL API :
 
 ```cpp
-#define SAFEHOME_API_URL "http://192.168.1.42:5000/api/sensor-data"
+#define SAFEHOME_API_URL "http://192.168.1.42:5001/api/sensor-data"
 ```
 
 ## Trouver l'IP du Mac
@@ -148,9 +148,9 @@ SCD40/SCD41 non détecté :
 API unreachable :
 
 - Lancer Flask avec `python app.py`.
-- Vérifier que Flask écoute sur `0.0.0.0:5000`.
+- Vérifier que Flask écoute sur `0.0.0.0:5001`.
 - Vérifier que Mac et ESP32 sont sur le même WiFi.
-- Tester depuis un autre appareil : `http://IP_DU_MAC:5000/api/health`.
+- Tester depuis un autre appareil : `http://IP_DU_MAC:5001/api/health`.
 - Autoriser Python/Terminal dans le firewall macOS.
 
 Mauvais réseau WiFi :
