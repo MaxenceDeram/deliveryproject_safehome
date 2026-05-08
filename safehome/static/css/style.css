@@ -680,6 +680,20 @@ h3 {
   padding: 38px clamp(24px, 3vw, 46px) 38px;
 }
 
+.dashboard-body,
+.dashboard-body p,
+.dashboard-body h1,
+.dashboard-body h2,
+.dashboard-body h3,
+.dashboard-body strong,
+.dashboard-body b,
+.dashboard-body small,
+.dashboard-body span,
+.dashboard-body a,
+.dashboard-body button {
+  color: #ffffff;
+}
+
 .dashboard-header {
   display: flex;
   justify-content: space-between;
@@ -1370,7 +1384,7 @@ h3 {
 .app-shell.is-loading .chart-panel,
 .app-shell.is-loading .donut-card,
 .app-shell.is-loading .summary-card {
-  color: transparent;
+  color: #ffffff;
 }
 
 .app-shell.is-loading .score-card::after,
@@ -1419,8 +1433,8 @@ h3 {
 }
 
 .fade-up {
-  opacity: 0;
-  transform: translateY(18px) scale(0.985);
+  opacity: 1;
+  transform: translateY(0) scale(1);
   transition: opacity 0.62s cubic-bezier(0.16, 1, 0.3, 1), transform 0.62s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
