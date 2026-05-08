@@ -46,9 +46,9 @@ Le projet n'a pas de build frontend séparé : le frontend est servi par Flask d
 
 ## Tester sans ESP32
 
-Le backend démarre avec un historique simulé pour permettre une démo immédiate du dashboard.
+Le backend démarre sans mesure par défaut. Le dashboard reste en attente tant que l'ESP32 n'a rien envoyé.
 
-Depuis le dashboard, cliquer sur `Simuler`.
+Pour faire une démo volontairement, cliquer sur `Simuler` depuis le dashboard.
 
 Ou appeler :
 

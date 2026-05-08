@@ -88,9 +88,9 @@ function chartColors() {
     violet: "#8b5cf6",
     orange: "#f59e0b",
     red: "#ef4444",
-    grid: "rgba(148, 163, 184, 0.13)",
-    text: "#94a3b8",
-    card: "rgba(15, 23, 42, 0.72)"
+    grid: "rgba(203, 213, 225, 0.18)",
+    text: "#cbd5e1",
+    card: "rgba(15, 23, 42, 0.9)"
   };
 }
 
@@ -141,7 +141,7 @@ function updateMetricCard(key, metric) {
   setToneClass(card, metric.tone);
   if (metric.tone === "bad") card.classList.add("pulse-alert");
 
-  valueEl.textContent = formatValue(metric.value_label);
+  valueEl.textContent = metric.measured ? formatValue(metric.value_label) : "--";
   unitEl.textContent = metric.measured ? metric.unit || "" : "";
   statusEl.textContent = metric.status_label || "En attente";
   card.setAttribute("aria-label", `${metric.label}: ${metric.value_label} ${metric.unit || ""}, ${metric.status_label}`);
@@ -164,12 +164,17 @@ function updateCurrent(payload) {
   const metrics = computed.metrics || {};
   ["co2", "temperature", "humidity", "gas_resistance"].forEach((key) => updateMetricCard(key, metrics[key]));
 
+  const hasMeasuredFields = (computed.measured_fields || []).length > 0;
   renderRecommendations(computed.recommendations || []);
-  renderRiskSummary(computed.risks || []);
-  renderConfidence(computed.confidence || {
+  renderRiskSummary(computed.risks || [], hasMeasuredFields);
+  renderConfidence(hasMeasuredFields ? computed.confidence || {
     level: computed.confidence_level,
     label: computed.confidence_label,
     explanation: computed.confidence_explanation
+  } : {
+    level: "low",
+    label: "En attente de mesure",
+    explanation: "Aucune donnée réelle n'a encore été reçue."
   });
   renderSimpleInterpretation(raw, computed);
 
@@ -262,9 +267,13 @@ function renderRecommendations(items = []) {
     : `<article class="recommendation-card"><div><strong>En attente</strong><p>Aucune action sans mesure récente.</p></div></article>`;
 }
 
-function renderRiskSummary(risks = []) {
+function renderRiskSummary(risks = [], hasMeasuredFields = true) {
   const target = qs("[data-risk-summary]");
   if (!target) return;
+  if (!hasMeasuredFields) {
+    target.innerHTML = `<span><small>Statut</small><strong>En attente de capteur</strong></span><p class="muted">Aucun risque n'est calculé tant que l'ESP32 n'a pas envoyé de mesure.</p>`;
+    return;
+  }
   if (!risks.length) {
     target.innerHTML = `<span><small>Statut</small><strong>Aucun signal critique</strong></span><p class="muted">Les publics sensibles doivent rester attentifs au confort et à la ventilation.</p>`;
     return;
@@ -311,7 +320,7 @@ function renderHealth(health) {
   if (apiState) {
     apiState.classList.toggle("connected", health.api === "ok");
     const apiLabel = qs("[data-api-label]", apiState);
-    if (apiLabel) apiLabel.textContent = health.api === "ok" ? "En ligne" : "API indisponible";
+    if (apiLabel) apiLabel.textContent = health.api === "ok" ? "API en ligne" : "API indisponible";
   }
   qs("[data-simulation-state]")?.classList.toggle("is-hidden", health.last_source !== "simulation");
   if (lastUpdate) lastUpdate.textContent = formatAge(health.last_update_seconds_ago);
@@ -475,6 +484,32 @@ function renderDonut(items = []) {
   const canvas = document.getElementById("qualityDonut");
   const legend = qs("[data-donut-legend]");
   if (!canvas || !chartReady()) return;
+  if (!items.length) {
+    const emptyData = {
+      labels: ["Aucune mesure"],
+      datasets: [{
+        data: [1],
+        backgroundColor: ["rgba(148, 163, 184, 0.22)"],
+        borderColor: "rgba(2, 6, 23, 0.96)",
+        borderWidth: 4,
+        hoverOffset: 0
+      }]
+    };
+    const emptyOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "70%",
+      plugins: { legend: { display: false }, tooltip: { enabled: false } }
+    };
+    if (!charts.donut) charts.donut = new Chart(canvas, { type: "doughnut", data: emptyData, options: emptyOptions });
+    else {
+      charts.donut.data = emptyData;
+      charts.donut.options = emptyOptions;
+      charts.donut.update();
+    }
+    if (legend) legend.innerHTML = `<span><i style="background:rgba(148, 163, 184, 0.5)"></i>Aucune mesure<strong>--</strong></span>`;
+    return;
+  }
   const buckets = qualityDistribution(items);
   const total = buckets.reduce((sum, bucket) => sum + bucket.count, 0) || 1;
   const data = {
@@ -659,7 +694,17 @@ async function loadRecommendationsPage() {
   const data = await getJson("/api/recommendations");
   const status = qs("[data-recommendation-status]");
   if (status) status.textContent = `${data.smiley || "○"} ${data.label || "En attente"} · score ${data.score ?? "--"}/100`;
-  grid.innerHTML = (data.items || []).map(recommendationPageCard).join("");
+  const items = data.items || [];
+  grid.innerHTML = items.length
+    ? items.map(recommendationPageCard).join("")
+    : `<article class="recommendation-card fade-up" tabindex="0">
+        <span class="recommendation-icon">◉</span>
+        <div>
+          <strong>En attente de mesure</strong>
+          <p>Connectez l'ESP32 ou lancez une simulation pour générer des conseils.</p>
+          <small>Aucune donnée inventée</small>
+        </div>
+      </article>`;
 }
 
 async function loadGuidelines() {

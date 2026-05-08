@@ -11,7 +11,6 @@ from services import storage
 
 
 app = Flask(__name__)
-storage.seed_demo_history()
 
 
 @app.context_processor
