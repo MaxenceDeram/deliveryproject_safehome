@@ -9,9 +9,13 @@ from .recommendations import generate_recommendations
 
 
 MAX_HISTORY = 500
+SOURCE_MODES = {"api", "simulation"}
 
 latest_record: dict[str, Any] | None = None
+latest_api_record: dict[str, Any] | None = None
+latest_simulated_record: dict[str, Any] | None = None
 history_store: list[dict[str, Any]] = []
+source_mode = "api"
 
 
 def now_utc() -> datetime:
@@ -43,14 +47,36 @@ def make_record(data: dict[str, Any], *, simulated: bool = False, source: str = 
 
 
 def append_history(record: dict[str, Any]) -> None:
-    global latest_record
+    global latest_record, latest_api_record, latest_simulated_record
     latest_record = record
+    if record["raw"].get("simulated"):
+        latest_simulated_record = record
+    else:
+        latest_api_record = record
     history_store.append(record)
     del history_store[:-MAX_HISTORY]
 
 
 def get_latest() -> dict[str, Any] | None:
-    return latest_record
+    return get_latest_for_mode(source_mode)
+
+
+def get_latest_for_mode(mode: str) -> dict[str, Any] | None:
+    if mode == "simulation":
+        return latest_simulated_record
+    return latest_api_record
+
+
+def get_source_mode() -> str:
+    return source_mode
+
+
+def set_source_mode(mode: str) -> str:
+    global source_mode
+    if mode not in SOURCE_MODES:
+        raise ValueError(f"Mode source invalide: {mode}")
+    source_mode = mode
+    return source_mode
 
 
 def get_history_count() -> int:
@@ -58,7 +84,10 @@ def get_history_count() -> int:
 
 
 def latest_age_seconds() -> int | None:
-    record = get_latest()
+    return record_age_seconds(get_latest())
+
+
+def record_age_seconds(record: dict[str, Any] | None) -> int | None:
     if not record:
         return None
     timestamp = record["raw"].get("timestamp")
@@ -134,7 +163,7 @@ def parse_timestamp(timestamp: str | None) -> datetime:
     return parsed
 
 
-def history_rows(range_key: str | None = None) -> list[dict[str, Any]]:
+def history_rows(range_key: str | None = None, mode: str | None = None) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     cutoff: datetime | None = None
     if range_key == "6h":
@@ -148,6 +177,10 @@ def history_rows(range_key: str | None = None) -> list[dict[str, Any]]:
 
     for record in history_store:
         raw = record["raw"]
+        if mode == "api" and raw.get("simulated"):
+            continue
+        if mode == "simulation" and not raw.get("simulated"):
+            continue
         parsed = parse_timestamp(raw.get("timestamp"))
         if cutoff and parsed < cutoff:
             continue
@@ -170,8 +203,8 @@ def history_rows(range_key: str | None = None) -> list[dict[str, Any]]:
     return rows
 
 
-def daily_summary() -> dict[str, Any]:
-    rows = history_rows("24h")
+def daily_summary(mode: str | None = None) -> dict[str, Any]:
+    rows = history_rows("24h", mode=mode)
     if not rows:
         return {"count": 0}
 
@@ -188,4 +221,3 @@ def daily_summary() -> dict[str, Any]:
         "humidity_avg": avg("humidity"),
         "voc_peak": max((row.get("voc_index") or 0 for row in rows), default=None),
     }
-

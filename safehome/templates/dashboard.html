@@ -16,10 +16,10 @@
         <p>Voici la qualité de l'air de votre maison en temps réel.</p>
       </div>
       <div class="header-actions">
-        <span class="status-badge connected" data-api-state><span></span><strong data-api-label>API en ligne</strong></span>
+        <span class="status-badge" data-api-state><span></span><strong data-api-label>Vérification API</strong></span>
         <span class="status-badge simulation is-hidden" data-simulation-state><span></span><strong>Données simulées</strong></span>
         <button class="icon-button" type="button" aria-label="Notifications" title="Notifications">⌁</button>
-        <button class="button button-ghost" type="button" data-simulate aria-label="Simuler une mesure">Simuler</button>
+        <button class="button button-ghost" type="button" data-source-toggle data-source-mode="api" aria-label="Basculer le mode de données">Mode simulation</button>
         <a class="button button-primary" href="{{ url_for('api_export_csv') }}" data-export-csv aria-label="Exporter le rapport CSV">⇩ Exporter le rapport</a>
       </div>
     </header>

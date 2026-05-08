@@ -304,27 +304,62 @@ function renderHealth(health) {
   const wifi = qs("[data-wifi-state]");
   const battery = qs("[data-battery-level]");
   const deviceId = qs("[data-device-id]");
+  const sourceToggle = qs("[data-source-toggle]");
+  const sourceMode = health.source_mode || (health.last_source === "simulation" ? "simulation" : "api");
+  const usingSimulation = sourceMode === "simulation";
+  const hasActiveDevice = usingSimulation ? health.has_simulation_data : health.esp32_connected;
 
-  const isConnected = health.esp32_connected || health.last_source === "simulation";
-  state?.classList.toggle("offline", !isConnected);
-  state?.classList.toggle("simulation", health.last_source === "simulation");
-  if (qs("strong", state)) {
-    qs("strong", state).textContent = health.esp32_connected
-      ? "Appareil connecté"
-      : health.last_source === "simulation"
+  if (state) {
+    const stateLabel = qs("strong", state);
+    state.classList.toggle("offline", !hasActiveDevice);
+    state.classList.toggle("simulation", usingSimulation);
+    if (stateLabel) {
+      stateLabel.textContent = usingSimulation
         ? "Mode simulation"
-        : "Hors ligne";
+        : health.esp32_connected
+          ? "Mode API connecté"
+          : "Mode API";
+    }
   }
   if (apiState) {
     apiState.classList.toggle("connected", health.api === "ok");
+    apiState.classList.toggle("offline", health.api !== "ok");
     const apiLabel = qs("[data-api-label]", apiState);
-    if (apiLabel) apiLabel.textContent = health.api === "ok" ? "API en ligne" : "API indisponible";
+    if (apiLabel) apiLabel.textContent = health.api === "ok" ? "API en ligne" : "Erreur API";
   }
-  qs("[data-simulation-state]")?.classList.toggle("is-hidden", health.last_source !== "simulation");
+  if (sourceToggle) {
+    sourceToggle.disabled = health.api !== "ok";
+    sourceToggle.dataset.sourceMode = sourceMode;
+    sourceToggle.textContent = usingSimulation ? "Passer en mode API" : "Mode simulation";
+  }
+  qs("[data-simulation-state]")?.classList.toggle("is-hidden", !usingSimulation);
   if (lastUpdate) lastUpdate.textContent = formatAge(health.last_update_seconds_ago);
   if (wifi) wifi.textContent = health.wifi || "--";
   if (battery) battery.textContent = health.battery === null || health.battery === undefined ? "--" : `${health.battery}%`;
   if (deviceId) deviceId.textContent = health.device_id || "SafeHome Device #1";
+}
+
+function renderApiError() {
+  const apiState = qs("[data-api-state]");
+  const state = qs("[data-device-state]");
+  const sourceToggle = qs("[data-source-toggle]");
+
+  if (apiState) {
+    apiState.classList.remove("connected");
+    apiState.classList.add("offline");
+    const apiLabel = qs("[data-api-label]", apiState);
+    if (apiLabel) apiLabel.textContent = "Erreur API";
+  }
+  if (state) {
+    state.classList.add("offline");
+    state.classList.remove("simulation");
+    const stateLabel = qs("strong", state);
+    if (stateLabel) stateLabel.textContent = "Erreur API";
+  }
+  if (sourceToggle) {
+    sourceToggle.disabled = true;
+    sourceToggle.textContent = "API indisponible";
+  }
 }
 
 function makeGradient(ctx, color) {
@@ -559,7 +594,7 @@ async function loadDashboardHistory(range = currentRange) {
     window.setTimeout(() => loadDashboardHistory(range), 120);
     return;
   }
-  const data = await getJson(`/api/history?range=${range}`);
+  const data = await getJson(`/api/history?range=${range}&source=active`);
   const items = data.items || [];
   renderMeasurementsChart(items);
   ["co2", "temperature", "humidity", "gas_resistance"].forEach((key) => renderSparkline(key, items));
@@ -599,21 +634,34 @@ function setupDashboardRange() {
   });
 }
 
-function setupSimulation() {
-  qsa("[data-simulate]").forEach((button) => {
+function setupSourceModeToggle() {
+  qsa("[data-source-toggle]").forEach((button) => {
     button.addEventListener("click", async () => {
-      const previous = button.textContent;
+      const sourceMode = button.dataset.sourceMode || "api";
+      let failed = false;
       button.disabled = true;
-      button.textContent = "Simulation...";
+      button.textContent = sourceMode === "simulation" ? "Mode API..." : "Simulation...";
       try {
-        await getJson("/api/simulate");
+        if (sourceMode === "simulation") {
+          await getJson("/api/source-mode", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mode: "api" })
+          });
+          showToast("Mode API activé");
+        } else {
+          await getJson("/api/simulate");
+          showToast("Mode simulation activé");
+        }
         await refreshDashboard();
         await loadLegacyHistory();
         await loadRecommendationsPage();
-        showToast("Mesure simulée créée");
+      } catch (error) {
+        failed = true;
+        renderApiError();
+        showToast("Erreur API");
       } finally {
-        button.disabled = false;
-        button.textContent = previous;
+        if (!failed) button.disabled = false;
       }
     });
   });
@@ -658,7 +706,7 @@ async function loadLegacyHistory(range = "24h") {
     window.setTimeout(() => loadLegacyHistory(range), 120);
     return;
   }
-  const data = await getJson(`/api/history?range=${range}`);
+  const data = await getJson(`/api/history?range=${range}&source=active`);
   renderLegacyCharts(data.items || []);
   const summary = qs("[data-history-summary]");
   if (summary) {
@@ -751,7 +799,7 @@ function setupFadeObserver() {
 document.addEventListener("DOMContentLoaded", async () => {
   setupTheme();
   setupNavigation();
-  setupSimulation();
+  setupSourceModeToggle();
   setupDashboardRange();
   setupHistoryFilters();
   setupFadeObserver();
@@ -763,6 +811,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadRecommendationsPage();
     await loadGuidelines();
   } catch (error) {
+    renderApiError();
     showToast("Impossible de charger l'API SafeHome");
   }
 
@@ -772,6 +821,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       pollInFlight = true;
       try {
         await refreshDashboard();
+      } catch (error) {
+        renderApiError();
       } finally {
         pollInFlight = false;
       }
@@ -782,6 +833,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       pollInFlight = true;
       try {
         await refreshShellHealth();
+      } catch (error) {
+        renderApiError();
       } finally {
         pollInFlight = false;
       }

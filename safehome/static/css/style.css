@@ -916,6 +916,15 @@ h3 {
   background: var(--blue);
 }
 
+.status-badge.offline {
+  border-color: rgba(239, 68, 68, 0.34);
+  background: rgba(127, 29, 29, 0.24);
+}
+
+.status-badge.offline span {
+  background: var(--red);
+}
+
 .is-hidden {
   display: none !important;
 }

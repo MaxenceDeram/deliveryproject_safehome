@@ -61,13 +61,18 @@ def api_current_data():
 @app.get("/api/history")
 def api_history():
     range_key = request.args.get("range", "24h")
-    items = storage.history_rows(range_key)
+    source = request.args.get("source")
+    source_mode = storage.get_source_mode() if source == "active" else source
+    if source_mode not in {"api", "simulation"}:
+        source_mode = None
+    items = storage.history_rows(range_key, mode=source_mode)
     return jsonify(
         {
             "range": range_key,
+            "source_mode": source_mode or "all",
             "count": len(items),
             "items": items,
-            "summary": storage.daily_summary(),
+            "summary": storage.daily_summary(mode=source_mode),
         }
     )
 
@@ -127,20 +132,29 @@ def api_guidelines():
 
 @app.get("/api/health")
 def api_health():
+    source_mode = storage.get_source_mode()
     record = storage.get_latest()
-    age = storage.latest_age_seconds()
-    esp32_connected = bool(record and not record["raw"].get("simulated") and age is not None and age <= 30)
+    api_record = storage.get_latest_for_mode("api")
+    simulation_record = storage.get_latest_for_mode("simulation")
+    age = storage.record_age_seconds(record)
+    api_age = storage.record_age_seconds(api_record)
+    esp32_connected = bool(api_record and api_age is not None and api_age <= 30)
+    selected_raw = record["raw"] if record else {}
     return jsonify(
         {
             "api": "ok",
+            "source_mode": source_mode,
             "esp32_connected": esp32_connected,
-            "device_connected": esp32_connected or bool(record and record["raw"].get("simulated")),
+            "device_connected": esp32_connected if source_mode == "api" else bool(simulation_record),
             "last_update_seconds_ago": age,
-            "last_source": record["raw"].get("source") if record else None,
-            "device_id": record["raw"].get("device_id") if record else None,
-            "battery": record["raw"].get("battery") if record else None,
-            "wifi": "simulation" if record and record["raw"].get("simulated") else "online" if esp32_connected else "waiting",
+            "api_last_update_seconds_ago": api_age,
+            "last_source": selected_raw.get("source") if selected_raw else None,
+            "device_id": selected_raw.get("device_id") if selected_raw else None,
+            "battery": selected_raw.get("battery") if selected_raw else None,
+            "wifi": "simulation" if source_mode == "simulation" and simulation_record else "online" if esp32_connected else "waiting",
             "history_count": storage.get_history_count(),
+            "has_api_data": bool(api_record),
+            "has_simulation_data": bool(simulation_record),
         }
     )
 
@@ -149,7 +163,26 @@ def api_health():
 def api_simulate():
     record = storage.make_record(storage.simulate_measurement(), simulated=True, source="simulation")
     storage.append_history(record)
+    storage.set_source_mode("simulation")
     return jsonify({"message": "Mesure simulée créée", **record}), 201
+
+
+@app.route("/api/source-mode", methods=["GET", "POST"])
+def api_source_mode():
+    if request.method == "POST":
+        payload = request.get_json(silent=True) or {}
+        mode = payload.get("mode")
+        if mode not in storage.SOURCE_MODES:
+            return jsonify({"error": "Mode invalide", "allowed": sorted(storage.SOURCE_MODES)}), 400
+        storage.set_source_mode(mode)
+
+    return jsonify(
+        {
+            "source_mode": storage.get_source_mode(),
+            "has_api_data": bool(storage.get_latest_for_mode("api")),
+            "has_simulation_data": bool(storage.get_latest_for_mode("simulation")),
+        }
+    )
 
 
 @app.get("/api/export.csv")
