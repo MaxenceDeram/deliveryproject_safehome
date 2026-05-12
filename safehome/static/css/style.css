@@ -1991,3 +1991,29 @@ h3 {
     display: none;
   }
 }
+
+/* --- Compteur de Série (Streak) --- */
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.84);
+  border: 1px solid var(--line);
+  color: #f3f4f6;
+  padding: 0.5rem 1.2rem;
+  border-radius: 9999px;
+  font-weight: 860;
+  font-size: 1.1rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: all 0.3s ease;
+}
+
+.streak-icon {
+  margin-right: 0.5rem;
+  font-size: 1.3rem;
+}
+
+.streak-badge.at-risk {
+  border-color: rgba(239, 68, 68, 0.34);
+  background: rgba(127, 29, 29, 0.24);
+  animation: alertPulse 2.1s ease-in-out infinite;
+}

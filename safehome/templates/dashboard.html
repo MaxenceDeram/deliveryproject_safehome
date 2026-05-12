@@ -12,8 +12,14 @@
     <header class="dashboard-header fade-up">
       <div>
         <p class="eyebrow">Surveillance temps réel</p>
-        <h1>Bonjour ! <span aria-hidden="true">🌿</span></h1>
-        <p>Voici la qualité de l'air de votre maison en temps réel.</p>
+        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+          <h1 style="margin-bottom: 0;">Bonjour ! <span aria-hidden="true">🌿</span></h1>
+          <div id="streak-counter" class="streak-badge" title="Série de jours avec une bonne qualité d'air">
+            <span class="streak-icon">❤️</span> 
+            <span id="streak-hearts-value">--</span>
+          </div>
+        </div>
+        <p style="margin-top: 4px;">Voici la qualité de l'air de votre maison en temps réel.</p>
       </div>
       <div class="header-actions">
         <span class="status-badge" data-api-state><span></span><strong data-api-label>Vérification API</strong></span>
@@ -73,7 +79,7 @@
           <p class="card-label">COV (Qualité air)</p>
           <span class="metric-icon">≋</span>
         </div>
-        <div class="metric-value"><strong data-metric-value>--</strong><span data-metric-unit>IAQ</span></div>
+      <div class="metric-value"><strong data-metric-value>--</strong><span data-metric-unit>kΩ</span></div>
         <p class="metric-status"><span></span><b data-metric-status>En attente</b></p>
         <canvas class="sparkline" id="sparkline-gas" aria-label="Mini courbe COV"></canvas>
       </article>
@@ -124,7 +130,7 @@
           <span class="legend-co2">CO₂ (ppm)</span>
           <span class="legend-temp">Température (°C)</span>
           <span class="legend-humidity">Humidité (%)</span>
-          <span class="legend-voc">COV (IAQ)</span>
+        <span class="legend-voc">COV (kΩ)</span>
         </div>
         <div class="chart-frame large">
           <canvas id="measurementsChart" aria-label="Graphique historique des mesures"></canvas>

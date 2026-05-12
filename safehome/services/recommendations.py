@@ -33,9 +33,40 @@ def _recommendation(
     )
 
 
-def generate_recommendations(data: dict[str, Any], risks: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
+def generate_recommendations(
+    data: dict[str, Any], 
+    risks: list[dict[str, Any]] | None = None,
+    streak: dict[str, Any] | None = None
+) -> list[dict[str, Any]]:
     recommendations: list[dict[str, Any]] = []
     seen: set[str] = set()
+
+    # --- RECOMMANDATIONS LIÉES À LA SÉRIE (GAMIFICATION) ---
+    if streak:
+        if streak.get("hearts") == 0:
+            _recommendation(
+                recommendations,
+                seen,
+                priority="moyenne",
+                title="Série perdue 💔",
+                message="La qualité de l'air a chuté en dessous de 50.",
+                action="Aérez bien aujourd'hui pour redémarrer une série de cœurs demain !",
+                icon="wind",
+                source="SafeHome Gamification",
+                why="Le système de série se réinitialise si l'air devient toxique/confiné.",
+            )
+        elif streak.get("at_risk"):
+            _recommendation(
+                recommendations,
+                seen,
+                priority="élevée",
+                title="Sauve ta série ! ❤️",
+                message="La qualité de l'air se dégrade, tes cœurs sont en danger.",
+                action="Pense à aérer pour garder ta série.",
+                icon="window",
+                source="SafeHome Gamification",
+                why="La série est réinitialisée si le score global tombe dans le rouge.",
+            )
 
     co2 = data.get("co2")
     if co2 is not None and float(co2) > 1500:
@@ -154,19 +185,6 @@ def generate_recommendations(data: dict[str, Any], risks: list[dict[str, Any]] |
             why="Le CO₂ doit venir d'un capteur NDIR dédié.",
         )
 
-    if "pm25" not in data or "pm10" not in data:
-        _recommendation(
-            recommendations,
-            seen,
-            priority="préventive",
-            title="Particules non mesurées",
-            message="PM2.5 et PM10 ne sont pas disponibles.",
-            action="Ajoutez un capteur de particules si le projet évolue.",
-            icon="sensor",
-            source="WHO Global Air Quality Guidelines 2021",
-            why="SafeHome affiche ces champs seulement si un capteur dédié envoie une vraie mesure.",
-        )
-
     _recommendation(
         recommendations,
         seen,
@@ -180,4 +198,3 @@ def generate_recommendations(data: dict[str, Any], risks: list[dict[str, Any]] |
     )
 
     return recommendations[:6]
-

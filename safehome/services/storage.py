@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from random import choice, uniform
 from typing import Any
 
-from .air_quality import METRIC_ORDER, build_computed, gas_resistance_to_voc_index
+from .air_quality import METRIC_ORDER, build_computed
 from .recommendations import generate_recommendations
 
 
@@ -16,6 +16,8 @@ latest_api_record: dict[str, Any] | None = None
 latest_simulated_record: dict[str, Any] | None = None
 history_store: list[dict[str, Any]] = []
 source_mode = "api"
+current_streak = 3  # On commence à 3 cœurs pour la démonstration
+last_streak_update_date = None
 
 
 def now_utc() -> datetime:
@@ -31,6 +33,8 @@ def normalize_timestamp(value: str | None) -> str:
 
 
 def make_record(data: dict[str, Any], *, simulated: bool = False, source: str = "esp32") -> dict[str, Any]:
+    global current_streak, last_streak_update_date
+    
     raw = data.copy()
     raw["timestamp"] = normalize_timestamp(raw.get("timestamp"))
     raw["simulated"] = simulated
@@ -38,7 +42,31 @@ def make_record(data: dict[str, Any], *, simulated: bool = False, source: str = 
     raw.setdefault("device_id", "safehome_demo" if simulated else "unknown_device")
 
     computed = build_computed(raw)
-    computed["recommendations"] = generate_recommendations(raw, computed["risks"])
+    
+    # --- LOGIQUE DE SÉRIE (STREAK) ---
+    score = computed.get("global_score")
+    at_risk = False
+    today = now_utc().date()
+    
+    if score is not None:
+        # Nouveau jour = +1 coeur (si on n'a pas perdu la série)
+        if last_streak_update_date is not None and last_streak_update_date < today and current_streak > 0:
+            current_streak += 1
+        last_streak_update_date = today
+
+        # Pénalités et alertes
+        if score < 50:
+            current_streak = 0
+        elif score < 70:
+            at_risk = True
+            
+    computed["streak"] = {
+        "hearts": current_streak,
+        "at_risk": at_risk,
+    }
+    # ---------------------------------
+    
+    computed["recommendations"] = generate_recommendations(raw, computed["risks"], computed["streak"])
     return {
         "raw": raw,
         "computed": computed,
@@ -102,6 +130,13 @@ def record_age_seconds(record: dict[str, Any] | None) -> int | None:
     return max(0, int((now_utc() - parsed).total_seconds()))
 
 
+def sim_score(co2: float) -> int:
+    if co2 <= 400: return 100
+    elif co2 <= 800: return int((co2 - 400) * (81 - 100) / (800 - 400) + 100)
+    elif co2 <= 1500: return int((co2 - 800) * (50 - 80) / (1500 - 800) + 80)
+    else: return max(0, min(100, int((co2 - 1500) * (0 - 49) / (3000 - 1500) + 49)))
+
+
 def simulate_measurement(*, timestamp: str | None = None) -> dict[str, Any]:
     scenario = choice(["excellent", "good", "co2", "humid", "voc", "warm"])
     base = {
@@ -130,6 +165,7 @@ def simulate_measurement(*, timestamp: str | None = None) -> dict[str, Any]:
         base["co2"] = int(uniform(720, 1060))
     if timestamp:
         base["timestamp"] = timestamp
+    base["score"] = sim_score(base["co2"])
     return base
 
 
@@ -195,7 +231,7 @@ def history_rows(range_key: str | None = None, mode: str | None = None) -> list[
             "confidence_level": computed.get("confidence_level"),
             "simulated": raw.get("simulated", False),
             "source": raw.get("source"),
-            "voc_index": gas_resistance_to_voc_index(raw.get("gas_resistance")),
+            "voc_index": round(raw.get("gas_resistance", 0) / 1000.0, 1) if raw.get("gas_resistance") is not None else None,
         }
         for key in METRIC_ORDER:
             row[key] = raw.get(key)
