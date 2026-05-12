@@ -162,6 +162,17 @@ function updateCurrent(payload) {
   const metrics = computed.metrics || {};
   ["co2", "temperature", "humidity", "gas_resistance"].forEach((key) => updateMetricCard(key, metrics[key]));
 
+  const streakData = computed.streak;
+  if (streakData) {
+    const streakCounter = document.getElementById('streak-counter');
+    const streakValue = document.getElementById('streak-hearts-value');
+    if (streakValue) streakValue.innerText = streakData.hearts;
+    if (streakCounter) {
+      if (streakData.at_risk) streakCounter.classList.add('at-risk');
+      else streakCounter.classList.remove('at-risk');
+    }
+  }
+
   const hasMeasuredFields = (computed.measured_fields || []).length > 0;
   renderRecommendations(computed.recommendations || []);
   renderRiskSummary(computed.risks || [], hasMeasuredFields);
@@ -409,7 +420,7 @@ function renderMeasurementsChart(items = []) {
         yAxisID: "y1"
       },
       {
-        label: "COV (IAQ)",
+        label: "COV (kΩ)",
         data: items.map((item) => item.voc_index ?? null),
         borderColor: c.orange,
         backgroundColor: "transparent",

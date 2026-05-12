@@ -6,8 +6,8 @@ from typing import Any
 from .health_guidelines import DISCLAIMER, GUIDELINES, SENSITIVE_PEOPLE
 
 
-CURRENT_SENSOR_FIELDS = {"temperature", "humidity", "pressure", "gas_resistance", "battery"}
-FUTURE_SENSOR_FIELDS = {"co2", "pm25", "pm10", "co", "no2", "ozone", "so2"}
+CURRENT_SENSOR_FIELDS = {"temperature", "humidity", "pressure", "gas_resistance", "battery", "score"}
+FUTURE_SENSOR_FIELDS = {"co2"}
 NUMERIC_FIELDS = CURRENT_SENSOR_FIELDS | FUTURE_SENSOR_FIELDS
 
 FIELD_RANGES: dict[str, tuple[float | None, float | None]] = {
@@ -17,12 +17,7 @@ FIELD_RANGES: dict[str, tuple[float | None, float | None]] = {
     "gas_resistance": (0, None),
     "battery": (0, 100),
     "co2": (0, 10000),
-    "pm25": (0, 1000),
-    "pm10": (0, 2000),
-    "co": (0, 1000),
-    "no2": (0, 10),
-    "ozone": (0, 2000),
-    "so2": (0, 2000),
+    "score": (0, 100),
 }
 
 METRIC_ORDER = [
@@ -32,18 +27,7 @@ METRIC_ORDER = [
     "gas_resistance",
     "pressure",
     "battery",
-    "pm25",
-    "pm10",
 ]
-
-SCORE_WEIGHTS = {
-    "co2": 0.36,
-    "humidity": 0.18,
-    "temperature": 0.14,
-    "gas_resistance": 0.22,
-    "pm25": 0.06,
-    "pm10": 0.04,
-}
 
 STATUS_LEVELS = [
     {
@@ -101,31 +85,6 @@ def round_value(value: float, digits: int = 1) -> float | int:
     return rounded
 
 
-def gas_resistance_to_voc_index(value: float | int | None) -> int | None:
-    if value is None:
-        return None
-    gas = float(value)
-    if gas >= 160000:
-        return 8
-    if gas >= 120000:
-        return 18
-    if gas >= 90000:
-        return 32
-    if gas >= 60000:
-        return 54
-    if gas >= 35000:
-        return 74
-    return 90
-
-
-def co_ppm_to_mg_m3(ppm: float) -> float:
-    return ppm * 28.01 / 24.45
-
-
-def no2_ppm_to_ug_m3(ppm: float) -> float:
-    return ppm * 46.0055 / 24.45 * 1000
-
-
 def compute_status(score: int | None) -> dict[str, Any]:
     if score is None:
         return UNKNOWN_STATUS.copy()
@@ -176,26 +135,6 @@ def _score_gas_resistance(value: float) -> int:
         return 62
     if value >= 25000:
         return 40
-    return 25
-
-
-def _score_pm25(value: float) -> int:
-    if value <= 5:
-        return 100
-    if value <= 15:
-        return 70
-    if value <= 35:
-        return 45
-    return 25
-
-
-def _score_pm10(value: float) -> int:
-    if value <= 15:
-        return 100
-    if value <= 45:
-        return 72
-    if value <= 90:
-        return 45
     return 25
 
 
@@ -341,7 +280,6 @@ def evaluate_metric(key: str, data: dict[str, Any]) -> dict[str, Any]:
 
     if key == "gas_resistance":
         score = _score_gas_resistance(value)
-        voc_index = gas_resistance_to_voc_index(value)
         if value >= 100000:
             status_label = "Faible"
             interpretation = "Signal BME680 favorable, COV estimés faibles."
@@ -351,6 +289,7 @@ def evaluate_metric(key: str, data: dict[str, Any]) -> dict[str, Any]:
         else:
             status_label = "Élevé"
             interpretation = "Signal BME680 défavorable, possible présence de COV/gaz."
+        val_kohm = round_value(value / 1000.0, 1)
         metric = _metric(
             key,
             value,
@@ -359,8 +298,8 @@ def evaluate_metric(key: str, data: dict[str, Any]) -> dict[str, Any]:
             interpretation,
             "Évitez sprays, bougies et produits odorants si le signal se dégrade.",
             confidence="estimated",
-            value_label=str(voc_index if voc_index is not None else round_value(value)),
-            unit="IAQ",
+            value_label=str(val_kohm),
+            unit="kΩ",
         )
         metric["raw_value"] = round_value(value)
         metric["raw_unit"] = "Ω"
@@ -392,97 +331,24 @@ def evaluate_metric(key: str, data: dict[str, Any]) -> dict[str, Any]:
             unit=GUIDELINES[key]["api_unit"],
         )
 
-    if key == "pm25":
-        score = _score_pm25(value)
-        return _metric(
-            key,
-            value,
-            score,
-            "Excellent" if value <= 5 else "À surveiller" if value <= 15 else "Élevé",
-            "PM2.5 comparé aux repères OMS si un capteur dédié est présent.",
-            "Réduisez fumée, bougies, cuisson intense et poussières si le niveau monte.",
-        )
-
-    if key == "pm10":
-        score = _score_pm10(value)
-        return _metric(
-            key,
-            value,
-            score,
-            "Excellent" if value <= 15 else "À surveiller" if value <= 45 else "Élevé",
-            "PM10 comparé aux repères OMS si un capteur dédié est présent.",
-            "Limitez les sources de poussières et aérez si possible.",
-        )
-
-    if key == "co":
-        converted = co_ppm_to_mg_m3(value)
-        status_label = "Correct" if converted <= 4 else "À surveiller" if converted <= 10 else "Élevé"
-        score = 100 if converted <= 4 else 56 if converted <= 10 else 20
-        return _metric(
-            key,
-            value,
-            score,
-            status_label,
-            f"Conversion indicative: {round_value(converted, 2)} mg/m³.",
-            "Un détecteur CO certifié reste indispensable pour la sécurité.",
-        )
-
-    if key == "no2":
-        converted = no2_ppm_to_ug_m3(value)
-        status_label = "Correct" if converted <= 10 else "À surveiller" if converted <= 25 else "Élevé"
-        score = 100 if converted <= 10 else 65 if converted <= 25 else 30
-        return _metric(
-            key,
-            value,
-            score,
-            status_label,
-            f"Conversion indicative: {round_value(converted, 1)} µg/m³.",
-            "Vérifiez les sources de combustion si le niveau augmente.",
-        )
-
     return metric_missing(key)
 
 
 def build_metrics(data: dict[str, Any]) -> dict[str, dict[str, Any]]:
     metrics = {key: evaluate_metric(key, data) for key in METRIC_ORDER if key in GUIDELINES}
-    for optional_key in ("co", "no2", "ozone", "so2"):
-        if optional_key in data:
-            metrics[optional_key] = evaluate_metric(optional_key, data)
     return metrics
-
-
-def compute_air_quality_score(data: dict[str, Any]) -> int | None:
-    metrics = build_metrics(data)
-    components: list[tuple[int, float]] = []
-    for key, metric in metrics.items():
-        score = metric.get("score_component")
-        if score is not None and key in SCORE_WEIGHTS:
-            components.append((int(score), SCORE_WEIGHTS[key]))
-
-    if not components:
-        return None
-
-    weighted = sum(score * weight for score, weight in components) / sum(weight for _, weight in components)
-    return max(0, min(100, round(weighted)))
 
 
 def compute_confidence_level(data: dict[str, Any]) -> dict[str, str]:
     measured = {key for key in NUMERIC_FIELDS if key in data and data[key] is not None}
     has_bme680 = {"temperature", "humidity", "pressure", "gas_resistance"}.issubset(measured)
     has_co2 = "co2" in measured
-    has_particles = {"pm25", "pm10"}.issubset(measured)
 
-    if has_bme680 and has_co2 and has_particles:
-        return {
-            "level": "high",
-            "label": "Confiance élevée",
-            "explanation": "BME680, CO₂ réel et particules fines sont disponibles.",
-        }
     if has_bme680 and has_co2:
         return {
             "level": "good",
-            "label": "Confiance solide",
-            "explanation": "BME680 + SCD40/SCD41 disponibles. Les particules restent non mesurées.",
+            "label": "Confiance élevée",
+            "explanation": "BME680 + SCD40/SCD41 sont disponibles.",
         }
     if {"temperature", "humidity", "gas_resistance"}.issubset(measured):
         return {
@@ -588,31 +454,6 @@ def generate_risks(data: dict[str, Any]) -> list[dict[str, Any]]:
                 }
             )
 
-    pm25 = data.get("pm25")
-    if pm25 is not None and float(pm25) > 5:
-        risks.append(
-            {
-                "level": "high" if float(pm25) > 15 else "medium",
-                "title": "Particules fines PM2.5",
-                "description": "Les PM2.5 dépassent un repère OMS utilisé ici comme référence préventive.",
-                "source": GUIDELINES["pm25"]["source"],
-                "affected_people": SENSITIVE_PEOPLE,
-                "confidence": "measured",
-            }
-        )
-
-    pm10 = data.get("pm10")
-    if pm10 is not None and float(pm10) > 15:
-        risks.append(
-            {
-                "level": "high" if float(pm10) > 45 else "medium",
-                "title": "Particules PM10",
-                "description": "Les PM10 dépassent un repère OMS utilisé ici comme référence préventive.",
-                "source": GUIDELINES["pm10"]["source"],
-                "affected_people": SENSITIVE_PEOPLE,
-                "confidence": "measured",
-            }
-        )
 
     return risks
 
@@ -677,22 +518,16 @@ def validate_sensor_payload(payload: Any) -> tuple[dict[str, Any] | None, list[s
 
 
 def build_computed(data: dict[str, Any]) -> dict[str, Any]:
-    score = compute_air_quality_score(data)
+    score = int(data["score"]) if data.get("score") is not None else None
     status = compute_status(score)
     metrics = build_metrics(data)
     confidence = compute_confidence_level(data)
     risks = generate_risks(data)
 
     if score is None:
-        interpretation = "Aucune mesure récente. Connectez l'ESP32 ou lancez une simulation."
-    elif "co2" not in data:
-        interpretation = (
-            "Score calculé sans CO₂ réel. Le BME680 ne mesure pas le CO₂; SafeHome attend un SCD40/SCD41 pour cette donnée."
-        )
-    elif "pm25" not in data or "pm10" not in data:
-        interpretation = "Score basé sur les capteurs disponibles. PM2.5 et PM10 restent non mesurés."
+        interpretation = "Aucune mesure de CO₂ récente. Connectez l'ESP32 ou lancez une simulation."
     else:
-        interpretation = "Score calculé uniquement avec les mesures réellement reçues."
+        interpretation = "Score calculé uniquement sur la base du CO₂ (SCD41) suite au dysfonctionnement du capteur BME680."
 
     return {
         "global_score": score,
@@ -706,8 +541,7 @@ def build_computed(data: dict[str, Any]) -> dict[str, Any]:
         "risks": risks,
         "human_interpretation": interpretation,
         "measured_fields": sorted(key for key in NUMERIC_FIELDS if key in data and data[key] is not None),
-        "missing_fields": sorted(key for key in ("co2", "pm25", "pm10") if key not in data),
+        "missing_fields": ["co2"] if "co2" not in data else [],
         "is_estimated": "gas_resistance" in data,
         "disclaimer": DISCLAIMER,
     }
-

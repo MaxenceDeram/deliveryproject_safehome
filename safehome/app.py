@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import csv
 import io
+import os
+from functools import wraps
 
 from flask import Flask, Response, jsonify, redirect, render_template, request, url_for
 
@@ -12,6 +14,18 @@ from services import storage
 
 app = Flask(__name__)
 
+# Définissez ici la même clé que celle mise dans "strongApiKey" sur votre ESP32
+API_KEY = os.environ.get("SAFEHOME_API_KEY", "8db67b6c-7625-4689-969a-91e83b22581f")
+
+def require_api_key(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # On vérifie la présence de l'en-tête X-API-KEY
+        provided_key = request.headers.get("X-API-KEY")
+        if provided_key != API_KEY:
+            return jsonify({"error": "Non autorisé. Clé API invalide ou manquante."}), 401
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.context_processor
 def inject_global_template_data():
@@ -96,6 +110,7 @@ def api_recommendations():
 
 
 @app.post("/api/sensor-data")
+@require_api_key
 def api_sensor_data():
     payload = request.get_json(silent=True)
     data, errors, warnings = validate_sensor_payload(payload)
@@ -267,4 +282,8 @@ def server_error(_error):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    # Pour activer le HTTPS, on utilise ssl_context avec des certificats
+    app.run(host="0.0.0.0", port=5001, debug=True, ssl_context=('cert.pem', 'key.pem'))
+    
+    # Si vous voulez repasser temporairement en HTTP (sans HTTPS), décommentez ceci et commentez la ligne au-dessus :
+    # app.run(host="0.0.0.0", port=5001, debug=True)
